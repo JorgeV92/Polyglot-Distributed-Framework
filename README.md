@@ -2,42 +2,58 @@
 
 ## Introduction
 
-The Polyglot Distributed Framework is a versatile, multi-language framework designed to implement and explore distributed systems concepts. It incorporates the use of Rust, Java, Python, and C++ to develop various components such as distributed log search, group membership protocols, and stream processing.
+The Polyglot Distributed Framework is a multi-language project that explores distributed systems concepts using Rust, Java, Python, and C++. It integrates functionalities like distributed log search, group membership, stream processing, and a fault-tolerant distributed file system (HyDFS).
 
 ## Features
 
-- **Multi-language Support**: Implementations in Rust, Java, Python, and C++.
-- **Distributed Log Search**: A system for querying distributed logs using Rust.
-- **Group Membership**: Failure detection and dynamic membership updates using protocols like Ping-Ack and Ping-Ack+S.
-- **Stream Processing Framework**: Real-time analytics on data streams with fault tolerance and exactly-once semantics.
-- **Scalability**: Designed to scale across multiple machines in a distributed environment.
+1. **Distributed Log Search**:
+   - A system to query distributed logs across multiple nodes using multi-threading and TCP communication.
 
-## Components
+2. **Group Membership Protocol**:
+   - Implements SWIM-inspired protocols for dynamic membership updates and failure detection.
 
-1. **Log Search**:
-   - Client-server architecture for querying distributed logs.
-   - Multi-threaded implementation for parallel search across nodes.
+3. **Stream Processing Framework**:
+   - Real-time analytics with fault tolerance, exactly-once semantics, and custom user-defined transformations.
 
-2. **Group Membership**:
-   - Implements SWIM-inspired protocols for failure detection.
-   - Supports membership updates and recovery mechanisms.
+4. **Distributed File System (HyDFS)**:
+   - Fault-tolerant file replication with read and write operations optimized for latency and consistency.
+   - Supports write quorum and sequence-number-based consistency for replicated files.
 
-3. **Stream Processing**:
-   - A framework similar to RainStorm for real-time data analytics.
-   - Includes operators for transformation, filtering, and aggregation.
+5. **Caching Mechanism**:
+   - Implements a cache for read-heavy workloads, with performance optimized for both uniform and Zipfian distributions.
 
-4. **Utilities**:
-   - Scripts for data preprocessing, simulation, and visualization.
+## Functional Overview
+
+### Distributed File System (HyDFS)
+
+1. **Replication**:
+   - Files are replicated on three servers to tolerate up to two simultaneous failures.
+   - Uses a pull-based approach to check for missing replicas every 5 seconds.
+
+2. **Read Operation**:
+   - Reads are served using a per-file sequence number to ensure the latest data is retrieved.
+   - Sequential querying of replicas until the most recent version is found.
+
+3. **Write Operation**:
+   - Writes are coordinated by a per-key coordinator.
+   - The coordinator ensures total ordering and propagates updates to replicas with acknowledgments for consistency.
+
+4. **Cache Performance**:
+   - Optimizes read latency by caching frequently accessed files.
+   - Handles cache invalidation effectively for workloads with append-heavy operations.
+
+### Integration with Other Components
+
+- **Log Search**: Log querying integrated with the distributed file system for efficient storage and access.
+- **Group Membership**: HyDFS leverages membership updates to handle dynamic changes in the cluster.
+- **Stream Processing**: Uses HyDFS for checkpointing and intermediate storage during stream processing.
 
 ## Requirements
 
-- **Languages & Tools**:
-  - Rust (cargo, rustc)
-  - Java (JDK 11+)
-  - Python (3.8+)
-  - C++ (GCC/Clang with C++17)
-- **Libraries**:
+- **Languages**:
+  - Rust, Java, Python, C++
+- **Dependencies**:
   - Rust: `serde`, `serde_json`, `regex`
-  - Java: Standard networking libraries
   - Python: `numpy`, `matplotlib`
+  - Java: Standard libraries
   - C++: STL
